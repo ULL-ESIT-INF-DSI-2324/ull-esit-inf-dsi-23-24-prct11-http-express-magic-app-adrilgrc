@@ -2,9 +2,11 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Card } from './card.js';
 import { Color, TypeLine, Rarity } from './enums.js';
-import { App } from './app.js';
+import net from 'net';
 
-const appInstance = new App();
+
+// const appInstance = new App();
+const connection = net.connect({ port: 60300 });
 
 /**
  * Command line interface to manage the card collection. The commands are:
@@ -85,8 +87,8 @@ yargs(hideBin(process.argv))
     demandOption: true
   }
  }, (argv) => {
-  let new_card = new Card(argv.id, argv.name, argv.manaCost, Color[argv.color as keyof typeof Color], TypeLine[argv.typeLine as keyof typeof TypeLine] , Rarity[argv.rarity as keyof typeof Rarity], argv.text, argv.value, argv.strength, argv.endurance, argv.loyaltyMark);
-  appInstance.addCard(argv.user, new_card);
+  const new_card = new Card(argv.id, argv.name, argv.manaCost, Color[argv.color as keyof typeof Color], TypeLine[argv.typeLine as keyof typeof TypeLine] , Rarity[argv.rarity as keyof typeof Rarity], argv.text, argv.value, argv.strength, argv.endurance, argv.loyaltyMark);
+  connection.write(JSON.stringify({command: 'add', user: argv.user, card: new_card}) + '\n');
  })
  /**
   * Command to remove a card from the collection. Example use:
@@ -104,7 +106,7 @@ yargs(hideBin(process.argv))
       demandOption: true
     }
   }, (argv) => {
-    appInstance.removeCard(argv.user, argv.id);
+    connection.write(JSON.stringify({command: 'remove', user: argv.user, id: argv.id}) + '\n');
   })
   /**
    * Command to modify a card from the collection. Example use:
@@ -175,9 +177,8 @@ yargs(hideBin(process.argv))
       demandOption: true
     }
   }, (argv) => {
-    console.log(argv.strengthResistence);
-    let new_card = new Card(argv.id, argv.name, argv.manaCost, Color[argv.color as keyof typeof Color], TypeLine[argv.typeLine as keyof typeof TypeLine] , Rarity[argv.rarity as keyof typeof Rarity], argv.text, argv.value, argv.strength, argv.endurance, argv.loyaltyMark);
-    appInstance.modifyCard('adrilgrc', argv.id, new_card);
+    const new_card = new Card(argv.id, argv.name, argv.manaCost, Color[argv.color as keyof typeof Color], TypeLine[argv.typeLine as keyof typeof TypeLine] , Rarity[argv.rarity as keyof typeof Rarity], argv.text, argv.value, argv.strength, argv.endurance, argv.loyaltyMark);
+    connection.write(JSON.stringify({command: 'modify', id: argv.id, user: argv.user, card: new_card}) + '\n');
   })
   /**
    * Command to list all cards from a user collection. Example use:
@@ -190,7 +191,7 @@ yargs(hideBin(process.argv))
       demandOption: true
     }
   }, (argv) => {
-    console.log(appInstance.ListCards(argv.user));
+    connection.write(JSON.stringify({command: 'list', user: argv.user}) + '\n');
   })
   /**
    * Command to show card details. Example use:
@@ -208,7 +209,24 @@ yargs(hideBin(process.argv))
       demandOption: true
       },
     }, (argv) => {
-      console.log(appInstance.showCard(argv.user, argv.id));
+      connection.write(JSON.stringify({command: 'show', user: argv.user, id: argv.id}) + '\n');
     })
  .help()
  .argv;
+
+let wholeData = '';
+connection.on('data', (data) => {
+  wholeData += data;
+});
+
+connection.on('error', (error) => {
+  console.log('[ERROR]:', error.message);
+});
+
+connection.on('end', () => {
+  console.log(wholeData);
+});
+
+connection.on('close', () => {
+  console.log('[INFO]: Connection closed');
+});
