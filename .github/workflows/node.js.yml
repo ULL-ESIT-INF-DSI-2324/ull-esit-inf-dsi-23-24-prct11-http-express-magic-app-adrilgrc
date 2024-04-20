@@ -26,6 +26,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
+    - name: Start server
+      run: npm run start &
     - run: npm test
     - name: Stop server
       run: kill $(lsof -t -i:3000) || true
