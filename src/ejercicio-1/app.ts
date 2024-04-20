@@ -245,21 +245,7 @@ export class App {
                     callback(new Error(errorMessage));
                 } else {
                     // Parse the card data to a JSON object
-                    const card = JSON.parse(cardData);
-                    // Create the result string with the card information
-                    let result = `------ ${chalk.bold('Card')} ------\n`;
-                    for (const [key, value] of Object.entries(card)) {
-                        if (key === '_color') {
-                            // Handle the _color property
-                            result += `${chalk.bold(key)}: ${getColorText(value as string)}\n`;
-                        } else {
-                            // Handle the rest of the properties
-                            result += `${chalk.bold(key)}: ${value}\n`;
-                        }
-                    }
-                    result += `------------------\n`;
-                    // Return the result string by calling the callback
-                    callback(undefined, result);
+                    callback(undefined, cardData);
                 }
             });
         }
