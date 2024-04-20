@@ -36,8 +36,8 @@ export class App {
     fs.access(cardRoute, fs.constants.F_OK, (err) => {
         if (!err) {
             // If the file already exists, show an error
-            const error = new Error(`[ERROR]: Card ${card.id} already exists for user ${user}`);
-            console.error(`[ERROR]: ${error.message}`);
+            const error = new Error(`Card ${card.id} already exists for user ${user}`);
+            console.error(`${error.message}`);
             callback(error);
         } else {
             // If the file does not exist, write the card data to a new file
@@ -45,12 +45,12 @@ export class App {
                 if (err) {
                     // If an error occurs while writing the file, show an error
                     console.error(
-                        `[ERROR]: Failed to add card ${card.id} for ${user}: ${err.message}`,
+                        `Failed to add card ${card.id} for ${user}: ${err.message}`,
                     );
                     callback(err);
                 } else {
                     // If the file was written successfully, show a success message
-                    console.log(`[OK]: Card ${card.id} added to ${user} collection`);
+                    console.log(`Card ${card.id} added to ${user} collection`);
                     callback(undefined, 0);
                 }
             });
@@ -78,28 +78,28 @@ export class App {
     fs.access(userCollectionDir, fs.constants.F_OK, (err) => {
       if (err) {
         // If the directory does not exist, show an error
-        console.error(`[ERROR]: User ${user} does not exist`);
-        callback(new Error(`[ERROR]: User ${user} does not exist`), 1);
+        console.error(`User ${user} does not exist`);
+        callback(new Error(`User ${user} does not exist`), 1);
       } else {
         //  If the directory exists, verify if the card file exists
         fs.access(cardRoute, fs.constants.F_OK, (err) => {
           if (err) {
             // If the file does not exist, show an error
-            console.error(`[ERROR]: Card ${cardId} does not exist`);
-            callback(new Error(`[ERROR]: Card ${cardId} does not exist`), 1);
+            console.error(`Card ${cardId} does not exist`);
+            callback(new Error(`Card ${cardId} does not exist`), 1);
           } else {
             // If the file exists, remove it
             fs.unlink(cardRoute, (err) => {
               if (err) {
                 // If an error occurs while removing the file, show an error
                 console.error(
-                  `[ERROR]: Failed to remove card ${cardId}: ${err.message}`,
+                  `Failed to remove card ${cardId}: ${err.message}`,
                 );
                 callback(err, 1);
               } else {
                 // If the file was removed successfully, show a success message
                 console.log(
-                  `[OK]: Card ${cardId} removed from ${user} collection`,
+                  `Card ${cardId} removed from ${user} collection`,
                 );
                 callback(undefined, 0);
               }
@@ -125,7 +125,7 @@ export class App {
     fs.access(userCollectionDir, fs.constants.F_OK, (err) => {
       if (err) {
         // If the directory does not exist, show an error
-        const errorMessage = `[ERROR]: User ${user} does not exist`;
+        const errorMessage = `User ${user} does not exist`;
         console.error(chalk.red(errorMessage));
         callback(new Error(errorMessage), 1);
       } else {
@@ -133,26 +133,26 @@ export class App {
         fs.access(cardRoute, fs.constants.F_OK, (err) => {
           if (err) {
             // If the file does not exist, show an error
-            const errorMessage = `[ERROR]: Card ${cardId} does not exist`;
+            const errorMessage = `Card ${cardId} does not exist`;
             console.error(chalk.red(errorMessage));
             callback(new Error(errorMessage), 1);
           } else {
             //  If the file exists, remove it
             fs.unlink(cardRoute, (err) => {
               if (err) {
-                const errorMessage = `[ERROR]: Failed to remove card ${cardId}: ${err.message}`;
+                const errorMessage = `Failed to remove card ${cardId}: ${err.message}`;
                 console.error(chalk.red(errorMessage));
                 callback(new Error(errorMessage), 1);
               } else {
                 // Write the modified card to a new file
                 fs.writeFile(cardRoute, JSON.stringify(new_card), (err) => {
                   if (err) {
-                    const errorMessage = `[ERROR]: Failed to write modified card ${cardId}: ${err.message}`;
+                    const errorMessage = `Failed to write modified card ${cardId}: ${err.message}`;
                     console.error(chalk.red(errorMessage));
                     callback(new Error(errorMessage), 1);
                   } else {
                     // If the file was written successfully, show a success message
-                    console.log(chalk.green(`[OK]: Card ${cardId} modified`));
+                    console.log(chalk.green(`Card ${cardId} modified`));
                     callback(null, 0);
                   }
                 });
@@ -175,7 +175,7 @@ export class App {
     const userCollectionDir = `${collectionsDir}${user}/`;
     // Check if the user collection exists. If not, shows an error.
     if (!fs.existsSync(userCollectionDir)) {
-      let errorMessage = `[ERROR]: User ${user} does not exist`;
+      let errorMessage = `User ${user} does not exist`;
       console.log(chalk.red(errorMessage));
       return undefined;
     }
@@ -233,15 +233,15 @@ export class App {
     fs.access(cardRoute, fs.constants.F_OK, (err) => {
         if (err) {
             // If the directory does not exist, show an error
-            let errorMessage = `[ERROR]: Card ${cardId} does not exist`;
+            let errorMessage = `Card ${cardId} does not exist`;
             console.error(chalk.red(errorMessage));
             callback(new Error(errorMessage));
         } else {
             // If the directory exists, read the card data from the file
             fs.readFile(cardRoute, 'utf-8', (err, cardData) => {
                 if (err) {
-                    let errorMessage = `[ERROR]: Failed to read card data from file ${cardId}: ${err.message}`;
-                    console.error(`[ERROR]: Failed to read card data from file ${cardId}: ${err.message}`);
+                    let errorMessage = `Failed to read card data from file ${cardId}: ${err.message}`;
+                    console.error(`Failed to read card data from file ${cardId}: ${err.message}`);
                     callback(new Error(errorMessage));
                 } else {
                     // Parse the card data to a JSON object

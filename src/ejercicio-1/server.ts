@@ -21,7 +21,31 @@ server.get('/cards', (req, res) => {
     });
   return;
   }
-});
+
+  if (!req.query.id) {
+    res.send({
+      status: '[ERROR]',
+      message: 'Id is required',
+    });
+    return;
+  } else {
+    cardAppInstance.showCard(req.query.user as string, parseInt(req.query.id as string), (error, result) => {
+      if (error) {
+        console.log("HUBO UN ERROR");
+        res.send({
+          status: '[ERROR]',
+          message: `${error}`,
+        });
+        return;
+      }
+      res.send({
+        status: '[OK]',
+        message: result,
+      });
+    });
+    return;
+  }
+  });
 
 server.post('/cards', (req, res) => {
   if (!req.query.user) {
@@ -49,6 +73,72 @@ server.post('/cards', (req, res) => {
   });
 
 });
+
+server.delete('/cards', (req, res) => {
+  if (!req.query.user) {
+    res.send({
+      status: '[ERROR]',
+      message: 'User is required',
+    });
+  return;
+  }
+
+  if (!req.query.id) {
+    res.send({
+      status: '[ERROR]',
+      message: 'Id is required',
+    });
+    return;
+  } else {
+    cardAppInstance.removeCard(req.query.user as string, parseInt(req.query.id as string), (error, result) => {
+      if (error) {
+        res.send({
+          status: '[ERROR]',
+          message: error,
+        });
+        return;
+      }
+      res.send({
+        status: '[OK]',
+        message: 'Card removed successfully',
+      });
+    });
+    return;
+  }
+  });
+
+server.patch('/cards', (req, res) => {
+  if (!req.query.user) {
+    res.send({
+      status: '[ERROR]',
+      message: 'User is required',
+    });
+  return;
+  }
+
+  if (!req.query.id) {
+    res.send({
+      status: '[ERROR]',
+      message: 'Id is required',
+    });
+    return;
+  } else {
+    cardAppInstance.modifyCard(req.query.user as string, parseInt(req.query.id as string), req.body, (error, result) => {
+      if (error) {
+        res.send({
+          status: '[ERROR]',
+          message: error,
+        });
+        return;
+      }
+      res.send({
+        status: '[OK]',
+        message: 'Card modified successfully',
+      });
+    });
+    return;
+  }
+  });
 
 
 server.listen(3000, () => {
