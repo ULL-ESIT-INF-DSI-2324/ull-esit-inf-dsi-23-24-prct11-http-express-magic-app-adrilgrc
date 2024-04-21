@@ -1,12 +1,10 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/sNC2m9MU)
-
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=ULL-ESIT-INF-DSI-2324_ull-esit-inf-dsi-23-24-prct11-http-express-magic-app-adrilgrc)
 
 [![Coverage Status](https://coveralls.io/repos/github/ULL-ESIT-INF-DSI-2324/ull-esit-inf-dsi-23-24-prct11-http-express-magic-app-adrilgrc/badge.svg?branch=main)](https://coveralls.io/github/ULL-ESIT-INF-DSI-2324/ull-esit-inf-dsi-23-24-prct11-http-express-magic-app-adrilgrc?branch=main)
 
 [![Tests](https://github.com/ULL-ESIT-INF-DSI-2324/ull-esit-inf-dsi-23-24-prct11-http-express-magic-app-adrilgrc/actions/workflows/node.js.yml/badge.svg)](https://github.com/ULL-ESIT-INF-DSI-2324/ull-esit-inf-dsi-23-24-prct11-http-express-magic-app-adrilgrc/actions/workflows/node.js.yml)
 
-# Práctica 10: Sistema Gestor de Cartas Magic con Sockets
+# Práctica 11: Sistema Gestor de Cartas Magic usando un servidor EXPRESS
 
 En ésta práctica se propone entre otras cosas adaptar el sistema gestor de cartas Magic implementado en la práctica 9 para que pueda ser utilizado en una estructura cliente-servidor. Para ello se utilizarán sockets y se implementará un servidor que permita a los clientes conectarse y realizar operaciones sobre la base de datos de ficheros de cartas.
 
