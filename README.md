@@ -7,27 +7,53 @@ En ésta práctica se propone entre otras cosas adaptar el sistema gestor de car
 
 ## Introducción
 
-En ésta práctica se plantean una serie de ejercicios que ayudan a profundizar y entender los conceptos del trato de ficheros con la API síncrona FS que proporciona Node. Además de las herramientas utilizadas en las prácticas individuales, se en ésta el manejo de la herramienta relativa a la calidad de código SonarCloud.
+En ésta práctica se plantean una serie de ejercicios que ayudan a profundizar y entender los conceptos del uso de promesas en Node. Además de las herramientas utilizadas en las prácticas individuales, se en ésta el manejo de la herramienta relativa a la calidad de código SonarCloud.
+
+**IMPORTANTE**: El servidor debe estar ejecutándose al momento de ejecutar los test.
 
 ## Desarrollo
 
-### Ejercicio 1: Implementación de los sockets
+### IMPORTANTE: ERRORES RELACIONADOS CON LAS ACTIONS
 
-Para la implementación de los sockets se ha creado una clase `ManagerServer` que hereda de `EventEmiiter` y que se encarga de gestionar las conexiones de los clientes. En el constructor de la clase se crea un servidor que escucha en el puerto 60300 y se añade un listener para el evento 'data' que se encarga de gestionar las peticiones de los clientes.
+En ésta práctica se me han producido una serie de errores de los que quiero dejar constancia. Por falta de tiempo, no he sido capaz de llegar a solucionarlos, y he tenido que hacer ciertos "apaños" para que funcione la action de tests.
 
-Es importante destacar que, como el enunciado nos pedía no hacer uso del evento 'end' para conocer cuándo se ha terminado de enviar la información segmentada, se ha optado por incluir un separador de salto de línea, para que así el servidor pudiera mandar su request.
+Como podrá ver, el SonarCloud no está computando correctamente. Directamente el coveralls no está detectando ningún fichero al que se le esté haciendo testing directamente y entiendo que, por lo tanto, la github action de Coveralls está devolviendo un error al tratar de ejecutarse. Entiendo que no detecta que se estén ejecutando tests directamente sobre los ficheros ya que el único fichero de tests que se está ejecutando (el de `server.spec.ts`) solo hace uso del paquete request para simular peticiones al servidor, y no llama a a ninguna función directamente.
 
-Tenemos un fichero `server.ts` que se encarga de crear una instancia de la clase ManagerServer y de iniciar el servidor. A su vez, éste fichero se encarga de gestionar las peticiones de los clientes (haciendo de intermediario entre el cliente y la App desarrollada en la práctica anterior).
+Como podrá ver, hay otro fichero de testing llamado `modificacion.spec.ts`. Ahí se encuentran las pruebas que realicé durante la modificación: sin embargo, hay un problema a la hora de pasarlos por el github action, y es que me devuelven errores donde no hay en local (por ejemplo, ficheros que no existen, cuando sí que existen y sus respectivas carpetas al ejecutar los test en local). Traté de solucionarlo pero no hubo éxito, así que tuve que dejar ese fichero todo comentado con el objetivo de que al menos la action de los tests pueda ser ejecutada, con el precio ya comentado anteriormente de que coveralls no detecte ningún fichero sobre el que se haga cubrimiento de código en los tests y, sonarcloud, al no tener la info del coverage, no pueda tampoco ejecutarse.
 
-Para gestionarlo, desglosa el contenido de la descripción y, en base al comando `command` recibido, ejecuta la acción correspondiente. Para ello, se ha hecho uso de un switch que evalúa el comando recibido y ejecuta la acción correspondiente.
+A modo de resumen:
+- El testing funciona en local a expensas de que las action vayan mal.
+- Si quiere comprobar el testing de la modificación, descomente el contenido del fichero `testing.spec.ts`.
+- El código a parte ha sido probado a mano y los resultados han sido satisfactorios.
 
-También cabe mencionar que métodos de la clase `App` han sido modificados para que sean utilizados por la API asíncrona basada en callbacks de `fs`. Para ello, se ha seguido el patrón de diseño Callback.
+### Ejercicio 1: Implementación de un servidor Express
 
-### Modificación 1: Uso del patrón Callback con la API asíncrona de fs
+Para la implementación de ésta práctica, partiendo desde la práctica anterior, lo que se ha hecho es implementar un servidor Express que sea capaz de gestionar nuestras peticiones. Para ello, dentro del fichero `server.ts` se ha instanciado un nuevo servidor Express (`const server = express()`).
 
-Para la modificación 1 se ha modificado la clase `App` para que haga uso de la API asíncrona de fs. Para ello, se han modificado los métodos `readFile` y `writeFile` para que hagan uso de la API asíncrona de fs y se les ha añadido un callback que se ejecuta una vez se ha terminado de leer o escribir el fichero. Además, hay casos como el del método para revisar el contenido de un fichero, que se ha tenido que modificar para que haga uso de la API asíncrona de fs al método `access`.
+#### Los manejadores de peticiones
 
-En éste caso, sí que se han podido utilizar los test, ya que no se quedan colgados y se pueden ejecutar correctamente.
+A continuación, lo que se ha hecho es crear una serie de manejadores que se encarguen de trabajar con las funciones de la aplicación gestora de cartas ya creada en prácticas anteriores. Para ello, se ha dotado al servidor de capacidad de responder en la ruta `/cards` de los siguientes tipos de peticiones:
+
+- `GET`: Éste tipo de petición se encarga de devolver la información de la carta deseada por el usuario basada en los parámetros de la query. Sin embargo, es **importante** destacar que, si bien en ejercicios anteriores lo que hacía ésta función era o bien imprimir la carta formateada, o devolver el contenido formateado, en ésta práctica lo que se ha hecho es provocar que devuelva un objeto JSON del objeto de la carta, de tal forma que así se consigue un funcionamiento más similar a una API real, ya que el cliente podría trabajar con el objeto devuelto como se hace normalmente en la realidad. También cabe destacar que, por falta de tiempo, solo he podido hacer que cuando se envíe una petición GET, ésta responda a devolver una única carta mediante la llamada a `showCard` de la aplicación, ya que no he podido convertir a patrón callback la función que era encargada de listarlas todas debido a múltiples errores.
+- `POST`: Ésta petición hará que el servidor se encargue de manejar el proceso de añadido de una carta mediante la función de la aplicación `addCard`, previamente convertida a patrón Callback. Internamente, los pasos serán los siguientes:
+    - Se comprobará que en la query venga el parámetro de usuario. Si no es así se maneja error.
+    - Se crea una nueva carta con el json enviado por el body de la petición.
+    - Se intentará crear la carta llamando a la función `addCard`, se informará de éxito o error dependiendo de lo que devuelva el callback.
+- `DELETE`: Se encarga del borrado de una carta concreta de la colección. En la query vienen indicados tanto el usuario al que deseamos borrarle la carta como el id de la carta en sí. En éste caso el body va vacío. El funcionamiento a grandes rasgos es el siguiente:
+    - Se comprueba que en la query se haya mandado el usuario. Si no es así se informa de error.
+    - Se comprueba que se haya mandado el identificador. De nuevo, si no es así, se informa de error.
+    - Se procede a tratar de borrar la carta. Si se consigue, se informa, sino, se informa con el error que devuelve el callback de la función `removeCard`.
+- `PATCH`: Se encarga de modificar una carta ya existente en la colección del usuario.
+    - Se comprueba que en la query se haya mandado el usuario. Si no es así se informa de error.
+    - Se comprueba que se haya mandado el identificador. De nuevo, si no es así, se informa de error.
+    - Se procede a tratar de modificar la carta. Si se consigue, se informa, sino, se informa con el error que devuelve el callback de la función `modifyCard`.
+
+
+### Modificación 1: Uso de Promesas con la API asíncrona de fs
+
+Para la modificación 1 se ha modificado la clase `App` para que haga uso de la API asíncrona de promesas de fs. Para ello, se han modificado los métodos `readFile`,`writeFile` para que hagan uso de la API asíncrona de promesas de fs ha hecho que devuelvan una promesa, con el resultado dependiendo de lo que se ejecuta una vez se ha terminado de leer o escribir el fichero. Además, hay casos como el del método para revisar el contenido de un fichero, que se ha tenido que modificar para que haga uso de la API asíncrona de fs al método `access`.
+
+Como se mencionó anteriormente, en éste caso los test funcionan de forma local, pero al tratar de ejecutar las actions comienzan a dar errores relacionados con los errores que están devolviendo las promesas, que aparecen distintos a los que hay en local, produciéndose errores donde no hay en local. Podrá comprobar que descomentando el código de los test del fichero `modificacion.spec.ts`, que funcionan correctamente.
 
 ## Conclusiones
 
